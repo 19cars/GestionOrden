@@ -1,0 +1,6 @@
+[submodule "src/GestionOrden.Api/shared/GestinOrden.ContratosInternos"]
+	path = src/GestionOrden.Api/shared/GestinOrden.ContratosInternos
+	url = https://github.com/19cars/GestionOrden.ContratosInternos.git
+[submodule "src/GestionOrden.Infrastructure/shared/ContratosInternos"]
+	path = src/GestionOrden.Infrastructure/shared/ContratosInternos
+	url = https://github.com/19cars/GestionOrden.ContratosInternos.git
