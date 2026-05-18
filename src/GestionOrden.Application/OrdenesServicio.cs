@@ -1,11 +1,12 @@
-
 using GestionOrden.Domain;
 using GestionOrden.Infrastructure;
 using GestionOrden.Infrastructure.Contratos;
 using GestionOrden.Persistencia;
+using GestionOrden.ContratosInternos.Ordenes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using GestionOrden.Infrastructure.ServicioCalculo;
 
 namespace GestionOrden.Application;
 
@@ -75,7 +76,7 @@ public sealed class OrdenesServicio
             detalles);
     }
 
-    /*public async Task<OrdenDetalleRespuesta> CrearAsync(CrearOrdenSolicitud solicitud, string usuario, CancellationToken cancelacion)
+    public async Task<OrdenDetalleRespuesta> CrearAsync(CrearOrdenSolicitud solicitud, string usuario, CancellationToken cancelacion)
     {
         var itemsInternos = solicitud.Items
             .Select(i => new ItemOrdenInterno(i.ProductoId, i.Cantidad))
@@ -170,5 +171,5 @@ public sealed class OrdenesServicio
 
         return await ObtenerDetalleAsync(orden.Id, cancelacion)
                ?? throw new InvalidOperationException("No se pudo cargar la orden creada.");
-    }*/
+    }
 }

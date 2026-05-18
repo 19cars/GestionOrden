@@ -2,13 +2,17 @@ using GestionOrden.Api.Extensions;
 using GestionOrden.Application;
 using GestionOrden.Database;
 using GestionOrden.Domain;
+using GestionOrden.Infrastructure.ServicioCalculo;
 using GestionOrden.Persistencia;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using static System.Net.Mime.MediaTypeNames;
+using GestionOrden.Api.Validadores;
 
 // Cargar variables de entorno desde .env antes de construir el WebApplication
 DotEnvExtensions.LoadDotEnv();
@@ -34,8 +38,21 @@ builder.Services.AddSwaggerDocumentation();
 builder.Services.AddScoped<CategoriasServicio>();
 builder.Services.AddScoped<ProductosServicio>();
 builder.Services.AddScoped<OrdenesServicio>();
-// Registrar controllers para que los controllers en Controllers/ se descubran
+
+builder.Services.AddHttpClient<IServicioInternoOrdenes, ServicioInternoOrdenesHttp>((ambito, cliente) =>
+{
+    var opciones = ambito.GetRequiredService<Microsoft.Extensions.Options.IOptions<OpcionesServicioInternoOrdenes>>().Value;
+    cliente.BaseAddress = new Uri(opciones.UrlBase.TrimEnd('/') + "/");
+    cliente.Timeout = TimeSpan.FromSeconds(opciones.SegundosEspera);
+    if (!cliente.DefaultRequestHeaders.Contains(opciones.NombreCabeceraClave))
+    {
+        cliente.DefaultRequestHeaders.Add(opciones.NombreCabeceraClave, opciones.ValorClave);
+    }
+});
+
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CrearCategoriaSolicitudValidador>();
 
 // JWT configuration - read secret and optional issuer/audience from environment
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new InvalidOperationException("JWT_SECRET env var is required for JWT authentication.");

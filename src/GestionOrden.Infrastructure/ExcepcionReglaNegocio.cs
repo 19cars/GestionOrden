@@ -1,4 +1,4 @@
-using GestionOrden.Infrastructure.Contratos;
+using GestionOrden.ContratosInternos.Ordenes;
 
 namespace GestionOrden.Infrastructure;
 

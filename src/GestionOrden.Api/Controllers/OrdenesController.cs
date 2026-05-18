@@ -36,7 +36,7 @@ public sealed class OrdenesController : ControllerBase
         return orden is null ? NotFound() : Ok(orden);
     }
 
-    /*[HttpPost]
+    [HttpPost]
     [Authorize(Roles = $"{RolesNombres.Administrador},{RolesNombres.Operador}")]
     public async Task<ActionResult<OrdenDetalleRespuesta>> Crear(
         [FromBody] CrearOrdenSolicitud solicitud,
@@ -44,5 +44,5 @@ public sealed class OrdenesController : ControllerBase
     {
         var creado = await _servicio.CrearAsync(solicitud, UsuarioAuditoria.Identificador(User), cancelacion);
         return CreatedAtAction(nameof(Obtener), new { id = creado.Id }, creado);
-    }*/
+    }
 }

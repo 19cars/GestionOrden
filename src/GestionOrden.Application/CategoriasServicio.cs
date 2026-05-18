@@ -5,14 +5,21 @@ using GestionOrden.Infrastructure.Contratos;
 using GestionOrden.Persistencia;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GestionOrden.Application;
 
 public sealed class CategoriasServicio
 {
     private readonly ApplicationDbContext _contexto;
+    private readonly ILogger<CategoriasServicio> _logger;
 
-    public CategoriasServicio(ApplicationDbContext contexto) => _contexto = contexto;
+    public CategoriasServicio(ApplicationDbContext contexto,
+                            ILogger<CategoriasServicio> logger)
+    {
+        _contexto = contexto;
+        _logger = logger;
+    }
 
     public async Task<ResultadoPaginado<CategoriaRespuesta>> ListarAsync(
         int numeroPagina,
