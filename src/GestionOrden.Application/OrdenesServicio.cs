@@ -31,6 +31,7 @@ public sealed class OrdenesServicio
         int tamanoPagina,
         CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de OrdenesServicio:ListarAsync");
         var consulta = _contexto.Ordenes.AsNoTracking().OrderByDescending(o => o.Fecha);
         var total = await consulta.CountAsync(cancelacion);
         var elementos = await consulta
@@ -44,6 +45,7 @@ public sealed class OrdenesServicio
 
     public async Task<OrdenDetalleRespuesta?> ObtenerDetalleAsync(int id, CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de OrdenesServicio:ObtenerDetalleAsync");
         var orden = await _contexto.Ordenes.AsNoTracking()
             .Include(o => o.Detalles)
             .ThenInclude(d => d.Producto)
@@ -78,6 +80,7 @@ public sealed class OrdenesServicio
 
     public async Task<OrdenDetalleRespuesta> CrearAsync(CrearOrdenSolicitud solicitud, string usuario, CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de OrdenesServicio:CrearAsync");
         var itemsInternos = solicitud.Items
             .Select(i => new ItemOrdenInterno(i.ProductoId, i.Cantidad))
             .ToList();
@@ -103,10 +106,21 @@ public sealed class OrdenesServicio
                 respuestaInterna.Errores);
         }
 
-        await using var transaccion = await _contexto.Database.BeginTransactionAsync(cancelacion);
+        var transaccion = (Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?)null;
         Orden orden = null!;
         try
         {
+            // Algunos proveedores (por ejemplo InMemory) no soportan transacciones.
+            // Intentamos iniciar una transacción y, si falla, continuamos sin ella.
+            try
+            {
+                transaccion = await _contexto.Database.BeginTransactionAsync(cancelacion);
+            }
+            catch (InvalidOperationException)
+            {
+                // Ignorar: proveedor en memoria no soporta transacciones.
+            }
+
             var ahora = DateTimeOffset.UtcNow;
             orden = new Orden
             {
@@ -152,11 +166,19 @@ public sealed class OrdenesServicio
 
             _contexto.Ordenes.Add(orden);
             await _contexto.SaveChangesAsync(cancelacion);
-            await transaccion.CommitAsync(cancelacion);
+
+            if (transaccion is not null)
+            {
+                await transaccion.CommitAsync(cancelacion);
+            }
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            await transaccion.RollbackAsync(cancelacion);
+            if (transaccion is not null)
+            {
+                await transaccion.RollbackAsync(cancelacion);
+            }
+
             _logger.LogWarning(ex, "Conflicto de concurrencia al persistir la orden.");
             throw new ExcepcionReglaNegocio(
                 StatusCodes.Status409Conflict,
@@ -165,7 +187,11 @@ public sealed class OrdenesServicio
         }
         catch
         {
-            await transaccion.RollbackAsync(cancelacion);
+            if (transaccion is not null)
+            {
+                await transaccion.RollbackAsync(cancelacion);
+            }
+
             throw;
         }
 

@@ -26,6 +26,7 @@ public sealed class CategoriasServicio
         int tamanoPagina,
         CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de CategoriaServicio:ListarAsync");
         var consulta = _contexto.Categorias.AsNoTracking().OrderBy(c => c.Nombre);
         var total = await consulta.CountAsync(cancelacion);
         var elementos = await consulta
@@ -46,6 +47,7 @@ public sealed class CategoriasServicio
 
     public async Task<CategoriaRespuesta?> ObtenerAsync(int id, CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de CategoriaServicio:ObtenerAsync");
         return await _contexto.Categorias.AsNoTracking()
             .Where(c => c.Id == id)
             .Select(c => new CategoriaRespuesta(
@@ -61,6 +63,7 @@ public sealed class CategoriasServicio
 
     public async Task<CategoriaRespuesta> CrearAsync(CrearCategoriaSolicitud solicitud, string usuario, CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de CategoriaServicio:CrearAsync");
         var entidad = new Categoria { Nombre = solicitud.Nombre.Trim(), Activo = true };
         entidad.AplicarCreacion(usuario);
         _contexto.Categorias.Add(entidad);
@@ -81,6 +84,7 @@ public sealed class CategoriasServicio
         string usuario,
         CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de CategoriaServicio:ActualizarAsync");
         var entidad = await _contexto.Categorias.FirstOrDefaultAsync(c => c.Id == id, cancelacion);
         if (entidad is null)
         {
@@ -104,6 +108,7 @@ public sealed class CategoriasServicio
 
     public async Task DesactivarAsync(int id, string usuario, CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de CategoriaServicio:DesactivarAsync");
         var entidad = await _contexto.Categorias.FirstOrDefaultAsync(c => c.Id == id, cancelacion);
         if (entidad is null)
         {

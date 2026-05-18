@@ -19,6 +19,21 @@ DotEnvExtensions.LoadDotEnv();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddSimpleConsole(opciones =>
+{
+    opciones.TimestampFormat = "yyyy-MM-dd HH:mm:ss ";
+    opciones.SingleLine = true;
+});
+
+using var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder
+        .AddFilter("Microsoft", LogLevel.Warning)
+        .AddFilter("System", LogLevel.Warning)
+        .AddFilter("Program", LogLevel.Debug) // Tu categoría
+        .AddConsole(); // Enviar logs a la consola
+});
 // Ejecutar migraciones de base de datos (Evolve) al iniciar
 // Esto usará la connection string "Default" del configuration
 try
@@ -124,6 +139,14 @@ using (var scope = app.Services.CreateScope())
 
 // Leer prefijo de ruta para Swagger desde variable de entorno (opcional)
 var swaggerRoutePrefix = Environment.GetEnvironmentVariable("SWAGGER_ROUTE_PREFIX");
+
+//// 2. Crear el logger específico para esta clase
+//ILogger logger = loggerFactory.CreateLogger<Program>();
+
+//// 3. ¡Escribir logs!
+//logger.LogInformation("La aplicación de consola ha iniciado.");
+//logger.LogWarning("Esto es una advertencia.");
+//logger.LogError("Esto es un mensaje de error.");
 
 app.UseCors("FrontAngular");
 app.UseHttpsRedirection();

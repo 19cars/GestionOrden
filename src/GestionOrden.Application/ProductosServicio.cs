@@ -1,17 +1,24 @@
-using GestionOrden.Infrastructure.Contratos;
 using GestionOrden.Domain;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
 using GestionOrden.Infrastructure;
+using GestionOrden.Infrastructure.Contratos;
 using GestionOrden.Persistencia;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GestionOrden.Application;
 
 public sealed class ProductosServicio
 {
     private readonly ApplicationDbContext _contexto;
+    private readonly ILogger<ProductosServicio> _logger;
 
-    public ProductosServicio(ApplicationDbContext contexto) => _contexto = contexto;
+    public ProductosServicio(ApplicationDbContext contexto,
+                            ILogger<ProductosServicio> logger)
+    {
+        _contexto = contexto;
+        _logger = logger;
+    }
 
     public async Task<ResultadoPaginado<ProductoRespuesta>> ListarAsync(
         int numeroPagina,
@@ -21,6 +28,7 @@ public sealed class ProductosServicio
         bool? soloActivos,
         CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de ProductosServicio:ListarAsync");
         var consulta = _contexto.Productos.AsNoTracking().Include(p => p.Categoria).AsQueryable();
 
         if (categoriaId is not null)
@@ -66,6 +74,7 @@ public sealed class ProductosServicio
 
     public async Task<ProductoRespuesta?> ObtenerAsync(int id, CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de ProductosServicio:ObtenerAsync");
         return await _contexto.Productos.AsNoTracking()
             .Include(p => p.Categoria)
             .Where(p => p.Id == id)
@@ -87,6 +96,7 @@ public sealed class ProductosServicio
 
     public async Task<ProductoRespuesta> CrearAsync(CrearProductoSolicitud solicitud, string usuario, CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de ProductosServicio:CrearAsync");
         var categoriaExiste = await _contexto.Categorias.AnyAsync(c => c.Id == solicitud.CategoriaId && c.Activo, cancelacion);
         if (!categoriaExiste)
         {
@@ -120,6 +130,7 @@ public sealed class ProductosServicio
         string usuario,
         CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de ProductosServicio:ActualizarAsync");
         var entidad = await _contexto.Productos.FirstOrDefaultAsync(p => p.Id == id, cancelacion);
         if (entidad is null)
         {
@@ -151,6 +162,7 @@ public sealed class ProductosServicio
 
     public async Task DesactivarAsync(int id, string usuario, CancellationToken cancelacion)
     {
+        _logger.LogInformation("Inicio de ProductosServicio:DesactivarAsync");
         var entidad = await _contexto.Productos.FirstOrDefaultAsync(p => p.Id == id, cancelacion);
         if (entidad is null)
         {
