@@ -57,11 +57,11 @@ builder.Services.AddScoped<OrdenesServicio>();
 builder.Services.AddHttpClient<IServicioInternoOrdenes, ServicioInternoOrdenesHttp>((ambito, cliente) =>
 {
     var opciones = ambito.GetRequiredService<Microsoft.Extensions.Options.IOptions<OpcionesServicioInternoOrdenes>>().Value;
-    cliente.BaseAddress = new Uri(opciones.UrlBase.TrimEnd('/') + "/");
-    cliente.Timeout = TimeSpan.FromSeconds(opciones.SegundosEspera);
-    if (!cliente.DefaultRequestHeaders.Contains(opciones.NombreCabeceraClave))
+    cliente.BaseAddress = new Uri(builder.Configuration["ServicioInternoOrdenes:UrlBase"].TrimEnd('/') + "/");
+    cliente.Timeout = TimeSpan.FromSeconds(int.Parse(builder.Configuration["ServicioInternoOrdenes:SegundosEspera"]));
+    if (!cliente.DefaultRequestHeaders.Contains(Environment.GetEnvironmentVariable("NOMBRE-CABECERA-CLAVE") ?? throw new InvalidOperationException("NOMBRE-CABECERA-CLAVE es requerida para comunicarse con servicio Interno.")))
     {
-        cliente.DefaultRequestHeaders.Add(opciones.NombreCabeceraClave, opciones.ValorClave);
+        cliente.DefaultRequestHeaders.Add(Environment.GetEnvironmentVariable("NOMBRE-CABECERA-CLAVE"), Environment.GetEnvironmentVariable("VALOR-CABECERA-CLAVE"));
     }
 });
 
@@ -70,7 +70,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CrearCategoriaSolicitudValidador>();
 
 // JWT configuration - read secret and optional issuer/audience from environment
-var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new InvalidOperationException("JWT_SECRET env var is required for JWT authentication.");
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new InvalidOperationException("variable de ambiente JWT_SECRET es requerido para JWT authentication.");
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "GestionOrden";
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "GestionOrdenAudience";
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));

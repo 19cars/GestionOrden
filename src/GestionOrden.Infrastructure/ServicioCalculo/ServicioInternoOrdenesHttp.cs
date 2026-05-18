@@ -7,12 +7,7 @@ namespace GestionOrden.Infrastructure.ServicioCalculo;
 
 public sealed class OpcionesServicioInternoOrdenes
 {
-    public const string Seccion = "ServicioInternoOrdenes";
-    public string UrlBase { get; set; } = "http://localhost:5169";
-    public string NombreCabeceraClave { get; set; } = "X-Clave-Interna";
-    public string ValorClave { get; set; } = "clave-interna-desarrollo";
     public string RutaValidacion { get; set; } = "interno/ordenes/validar-y-calcular";
-    public int SegundosEspera { get; set; } = 30;
 }
 
 public interface IServicioInternoOrdenes
