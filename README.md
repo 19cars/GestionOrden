@@ -45,3 +45,12 @@ dotnet test
 
 - **JWT**: configure `Jwt:SECRET` (mínimo 32 caracteres recomendado) mediante **variables de entorno** o **User Secrets** en entornos reales.
 - **PostgreSQL**: no deje credenciales de producción en `appsettings.json`; use **User Secrets** o variables (`ConnectionStrings__BaseDatos`, etc.).
+
+## Archivo .env
+
+```bash
+DB-CONNECTION=server=localhost;port=5433;User Id=catalogo;Password=catalogo;Database=catalogo_ordenes;
+JWT_SECRET=DC5Lt1cBmZaq6msgtXB1yqxzCfu66wfKuycPCUzJEFY
+NOMBRE-CABECERA-CLAVE=X-Clave-Interna
+VALOR-CABECERA-CLAVE=clave-interna-desarrollo
+```
